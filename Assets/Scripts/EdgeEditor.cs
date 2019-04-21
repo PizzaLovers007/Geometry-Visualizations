@@ -14,6 +14,7 @@ public class EdgeEditor : Editor
 		Edge edge = target as Edge;
 
 		edge.defaultMaterial = EditorGUILayout.ObjectField("Default Material", edge.defaultMaterial, typeof(Material), true) as Material;
+		edge.fadedMaterial = EditorGUILayout.ObjectField("Faded Material", edge.fadedMaterial, typeof(Material), true) as Material;
 		edge.highlightMaterial = EditorGUILayout.ObjectField("Highlight Material", edge.highlightMaterial, typeof(Material), true) as Material;
 		if (edge.Point1)
 		{
@@ -32,5 +33,6 @@ public class EdgeEditor : Editor
 			p2Default = EditorGUILayout.Vector2Field("Position 2", p2Default);
 		}
 		edge.isHighlighted = EditorGUILayout.Toggle("Is Highlighted", edge.isHighlighted);
+		edge.isFaded = EditorGUILayout.Toggle("Is Faded", edge.isFaded);
 	}
 }

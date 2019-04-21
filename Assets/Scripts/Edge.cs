@@ -7,8 +7,10 @@ using UnityEngine;
 public class Edge : MonoBehaviour
 {
 	public Material defaultMaterial;
+	public Material fadedMaterial;
 	public Material highlightMaterial;
 	public bool isHighlighted;
+	public bool isFaded;
 
 	Vertex point1;
 	public Vertex Point1 {
@@ -91,6 +93,10 @@ public class Edge : MonoBehaviour
 		if (isHighlighted)
 		{
 			lineRenderer.material = highlightMaterial;
+		}
+		else if (isFaded)
+		{
+			lineRenderer.material = fadedMaterial;
 		}
 		else
 		{

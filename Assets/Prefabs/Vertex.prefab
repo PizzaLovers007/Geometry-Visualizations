@@ -97,8 +97,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultMaterial: {fileID: 2100000, guid: ea215b20b78ee43efadfcf7a476f7555, type: 2}
+  fadedMaterial: {fileID: 2100000, guid: 72e50d5197b9446949159977f6eec3a6, type: 2}
   highlightMaterial: {fileID: 2100000, guid: 7e72a42c4af6c4ab6b10862edbfae12c, type: 2}
   isHighlighted: 0
+  isFaded: 0
 --- !u!135 &135562326717648470
 SphereCollider:
   m_ObjectHideFlags: 1

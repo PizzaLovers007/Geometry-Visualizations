@@ -5,8 +5,10 @@ using UnityEngine;
 public class Vertex : MonoBehaviour
 {
 	public Material defaultMaterial;
+	public Material fadedMaterial;
 	public Material highlightMaterial;
 	public bool isHighlighted;
+	public bool isFaded;
 
 	public int Degree { get; set; }
 
@@ -33,6 +35,10 @@ public class Vertex : MonoBehaviour
 		if (isHighlighted)
 		{
 			renderer.material = highlightMaterial;
+		}
+		else if (isFaded)
+		{
+			renderer.material = fadedMaterial;
 		}
 		else
 		{
