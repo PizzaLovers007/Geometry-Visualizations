@@ -13,11 +13,9 @@ public class Edge : MonoBehaviour
 	public bool isFaded;
 
 	Vertex point1;
-	public Vertex Point1 {
-		get
-		{
-			return point1;
-		}
+	public Vertex Point1
+	{
+		get { return point1; }
 		set
 		{
 			if (value)
@@ -32,11 +30,9 @@ public class Edge : MonoBehaviour
 		}
 	}
 	Vertex point2;
-	public Vertex Point2 {
-		get
-		{
-			return point2;
-		}
+	public Vertex Point2
+	{
+		get { return point2; }
 		set
 		{
 			if (value)
@@ -48,6 +44,34 @@ public class Edge : MonoBehaviour
 				point2.Degree--;
 			}
 			point2 = value;
+		}
+	}
+	public Vertex LeftVertex
+	{
+		get
+		{
+			if (Point1.transform.position.x < Point2.transform.position.x)
+			{
+				return Point1;
+			}
+			else
+			{
+				return Point2;
+			}
+		}
+	}
+	public Vertex RightVertex
+	{
+		get
+		{
+			if (Point1.transform.position.x > Point2.transform.position.x)
+			{
+				return Point1;
+			}
+			else
+			{
+				return Point2;
+			}
 		}
 	}
 
@@ -114,6 +138,12 @@ public class Edge : MonoBehaviour
 		boxCollider.size = new Vector3(Vector3.Distance(pos1, pos2), lineRenderer.startWidth, lineRenderer.startWidth);
 		transform.position = (pos1+pos2) / 2;
 		transform.rotation = Quaternion.Euler(0, 0, Mathf.Atan2(pos2.y-pos1.y, pos2.x-pos1.x) * Mathf.Rad2Deg);
+	}
+
+	public float CalculateYCoord(float px)
+	{
+		float t = (px - Point1.transform.position.x) / (Point2.transform.position.x - Point1.transform.position.x);
+		return Point1.transform.position.y * (1 - t) + Point2.transform.position.y * t;
 	}
 
 	public override int GetHashCode()
