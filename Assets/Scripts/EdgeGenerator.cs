@@ -15,18 +15,30 @@ public class EdgeGenerator : MonoBehaviour
 	float delta;
 	Vector3 lastPosition;
 	Edge currEdge;
+	TrapezoidalMap trapezoidalMap;
 
 	// Use this for initialization
 	void Start()
 	{
 		Vertices = new HashSet<Vertex>();
 		Edges = new HashSet<Edge>();
+		trapezoidalMap = GameObject.Find("TrapezoidalMap").GetComponent<TrapezoidalMap>();
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
+		if (trapezoidalMap.IsGenerating)
+		{
+			return;
+		}
+
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		Vector3 viewPoint = Camera.main.WorldToViewportPoint(ray.origin);
+		if (viewPoint.x < 0 || viewPoint.x > 1 || viewPoint.y < 0 || viewPoint.y > 1)
+		{
+			return;
+		}
 		Vector3 worldPos = new Vector3(ray.origin.x, ray.origin.y, 0);
 
 		if (!isPlacing)

@@ -42,11 +42,16 @@ public class Node : MonoBehaviour
 		}
 	}
 
-	HashSet<Node> Parents { get; set; }
+	public HashSet<Node> Parents { get; set; }
+
+	static int nodeCount = 0;
+	public int id;
 
 	void Awake()
 	{
 		Parents = new HashSet<Node>();
+		id = nodeCount;
+		nodeCount++;
 	}
 
 	// Use this for initialization
@@ -70,9 +75,13 @@ public class Node : MonoBehaviour
 			{
 				parent.LeftChild = other;
 			}
-			else
+			else if (parent.RightChild == this)
 			{
 				parent.RightChild = other;
+			}
+			else
+			{
+				Debug.LogError("Node has parent that is not connected to it!");
 			}
 		}
 	}
@@ -90,5 +99,25 @@ public class Node : MonoBehaviour
 			RightChild = null;
 		}
 		Destroy(gameObject);
+	}
+
+	public override string ToString()
+	{
+		return $"{GetType().Name} - {id.ToString()}";
+	}
+
+	public override int GetHashCode()
+	{
+		return id;
+	}
+
+	public override bool Equals(object obj)
+	{
+		if (obj is Node)
+		{
+			Node other = obj as Node;
+			return id == other.id;
+		}
+		return false;
 	}
 }

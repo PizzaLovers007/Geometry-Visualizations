@@ -23,19 +23,4 @@ public class VertexNode : Node
 	{
 
 	}
-
-	public override bool Equals(object obj)
-	{
-		if (obj is VertexNode)
-		{
-			VertexNode other = obj as VertexNode;
-			return Data.Equals(other.Data);
-		}
-		return false;
-	}
-
-	public override int GetHashCode()
-	{
-		return Data.GetHashCode();
-	}
 }

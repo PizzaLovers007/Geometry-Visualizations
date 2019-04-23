@@ -7,6 +7,7 @@ using UnityEngine;
 public class Trapezoid : MonoBehaviour
 {
 	public Color color;
+	public bool isHighlighted;
 
 	[SerializeField]
 	Trapezoid topLeftTrap;
@@ -68,7 +69,22 @@ public class Trapezoid : MonoBehaviour
 	public Vertex RightVertex { get; set; }
 	public Edge TopEdge { get; set; }
 	public Edge BottomEdge { get; set; }
-	public TrapezoidNode Node { get; set; }
+	TrapezoidNode node;
+	public TrapezoidNode Node
+	{
+		get { return node; }
+		set
+		{
+			if (node != value)
+			{
+				node = value;
+				if (value)
+				{
+					value.Data = this;
+				}
+			}
+		}
+	}
 	
 	static int trapezoidCount = 0;
 
@@ -123,13 +139,19 @@ public class Trapezoid : MonoBehaviour
 		GetComponent<MeshRenderer>().material = new Material(Shader.Find("Unlit/Transparent"));
 
 		// Random color
-		color = Random.ColorHSV(0, 1, 1, 1, 1, 1, 0.25f, 0.25f);
+		color = Random.ColorHSV(0, 1, 0.3f, 0.3f, 1, 1);
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		GetComponent<MeshRenderer>().material.color = color;
+		Color matColor = color;
+		if (isHighlighted)
+		{
+			matColor = Color.red;
+			matColor.a = 0.5f;
+		}
+		GetComponent<MeshRenderer>().material.color = matColor;
 	}
 
 	public Trapezoid FindRightTrapezoid(Edge edge)

@@ -23,19 +23,4 @@ public class EdgeNode : Node
 	{
 
 	}
-
-	public override bool Equals(object obj)
-	{
-		if (obj is EdgeNode)
-		{
-			EdgeNode other = obj as EdgeNode;
-			return Data.Equals(other.Data);
-		}
-		return false;
-	}
-
-	public override int GetHashCode()
-	{
-		return Data.GetHashCode();
-	}
 }

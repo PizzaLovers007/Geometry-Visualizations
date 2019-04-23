@@ -12,20 +12,27 @@ public class TrapezoidalMap : MonoBehaviour
 	public GameObject vertexNodePrefab;
 	public GameObject edgeNodePrefab;
 	public GameObject trapezoidNodePrefab;
+	public GameObject nodeLinePrefab;
 	public float speed = 1;
+	public float spacing = 0.3f;
+
+	public bool IsGenerating { get; private set; }
 
 	Node Root { get; set; }
+	List<HashSet<Node>> TopologicalOrder { get; set; }
+	Dictionary<Trapezoid, TrapezoidNode> TrapNodeDict { get; set; } 
 
 	// Use this for initialization
 	void Start()
 	{
-
+		TopologicalOrder = new List<HashSet<Node>>();
+		TrapNodeDict = new Dictionary<Trapezoid, TrapezoidNode>();
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		if (Input.GetKeyDown(KeyCode.G))
+		if (Input.GetKeyDown(KeyCode.G) && !IsGenerating)
 		{
 			Debug.Log("Generating map");
 			if (Root)
@@ -39,10 +46,12 @@ public class TrapezoidalMap : MonoBehaviour
 
 	public IEnumerator AssembleMap(List<Edge> edges)
 	{
+		IsGenerating = true;
+		TrapNodeDict.Clear();
+
 		// Create initial trapezoid
 		Trapezoid bounds = CreateBoundingTrapezoid();
-		Root = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-		(Root as TrapezoidNode).Data = bounds;
+		Root = GetTrapezoidNode(bounds);
 		Root.gameObject.name = "Root";
 		
 		// Shuffle edges
@@ -59,6 +68,8 @@ public class TrapezoidalMap : MonoBehaviour
 			edges[i].Point1.isFaded = true;
 			edges[i].Point2.isFaded = true;
 		}
+
+		ShowDAG();
 
 		yield return new WaitForSecondsRealtime(speed);
 
@@ -134,14 +145,10 @@ public class TrapezoidalMap : MonoBehaviour
 				rightTrap.BottomRightTrap = edgeTraps.First().BottomRightTrap;
 
 				// Create new DAG nodes
-				leftNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				leftNode.Data = leftTrap;
-				rightNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				rightNode.Data = rightTrap;
-				topNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				topNode.Data = topTrap;
-				bottomNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				bottomNode.Data = bottomTrap;
+				leftNode = GetTrapezoidNode(leftTrap);
+				rightNode = GetTrapezoidNode(rightTrap);
+				topNode = GetTrapezoidNode(topTrap);
+				bottomNode = GetTrapezoidNode(bottomTrap);
 				pNode = Instantiate(vertexNodePrefab).GetComponent<VertexNode>();
 				pNode.Data = leftVertex;
 				qNode = Instantiate(vertexNodePrefab).GetComponent<VertexNode>();
@@ -196,12 +203,9 @@ public class TrapezoidalMap : MonoBehaviour
 				leftTrap.BottomLeftTrap = edgeTraps.First().BottomLeftTrap;
 
 				// Create corresponding DAG nodes
-				leftNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				leftNode.Data = leftTrap;
-				topNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				topNode.Data = topTrap;
-				bottomNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				bottomNode.Data = bottomTrap;
+				leftNode = GetTrapezoidNode(leftTrap);
+				topNode = GetTrapezoidNode(topTrap);
+				bottomNode = GetTrapezoidNode(bottomTrap);
 				pNode = Instantiate(vertexNodePrefab).GetComponent<VertexNode>();
 				pNode.Data = leftVertex;
 				sNode = Instantiate(edgeNodePrefab).GetComponent<EdgeNode>();
@@ -286,10 +290,8 @@ public class TrapezoidalMap : MonoBehaviour
 					if (i != edgeTraps.Count-1)
 					{
 						// Create corresponding DAG nodes
-						topNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-						topNode.Data = topTrap;
-						bottomNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-						bottomNode.Data = bottomTrap;
+						topNode = GetTrapezoidNode(topTrap);
+						bottomNode = GetTrapezoidNode(bottomTrap);
 						sNode = Instantiate(edgeNodePrefab).GetComponent<EdgeNode>();
 						sNode.Data = currEdge;
 						
@@ -325,12 +327,9 @@ public class TrapezoidalMap : MonoBehaviour
 				rightTrap.BottomRightTrap = edgeTraps.Last().BottomRightTrap;
 
 				// Create corresponding DAG nodes
-				rightNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				rightNode.Data = rightTrap;
-				topNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				topNode.Data = topTrap;
-				bottomNode = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
-				bottomNode.Data = bottomTrap;
+				rightNode = GetTrapezoidNode(rightTrap);
+				topNode = GetTrapezoidNode(topTrap);
+				bottomNode = GetTrapezoidNode(bottomTrap);
 				pNode = Instantiate(vertexNodePrefab).GetComponent<VertexNode>();
 				pNode.Data = rightVertex;
 				sNode = Instantiate(edgeNodePrefab).GetComponent<EdgeNode>();
@@ -362,8 +361,16 @@ public class TrapezoidalMap : MonoBehaviour
 			}
 			
 			// StringBuilder sb = new StringBuilder();
-			// InOrderTraverse(sb, Root);
+			// InOrderTraverse(Root, (node) => {
+			// 	if (node is TrapezoidNode)
+			// 	{
+			// 		sb.Append((node as TrapezoidNode).Data.id);
+			// 		sb.Append(" ");
+			// 	}
+			// });
 			// Debug.Log(sb.ToString());
+
+			ShowDAG();
 
 			yield return new WaitForSecondsRealtime(speed);
 
@@ -371,6 +378,16 @@ public class TrapezoidalMap : MonoBehaviour
 			currEdge.Point1.isHighlighted = false;
 			currEdge.Point2.isHighlighted = false;
 		}
+
+		IsGenerating = false;
+
+		// InOrderTraverse(Root, (node) => {
+		// 	foreach (Node parent in node.Parents)
+		// 	{
+		// 		Debug.Log($"{parent} ======> {node}");
+		// 	}
+		// });
+
 		yield return null;
 	}
 
@@ -414,6 +431,185 @@ public class TrapezoidalMap : MonoBehaviour
 		return trap;
 	}
 
+	TrapezoidNode GetTrapezoidNode(Trapezoid trap)
+	{
+		if (!TrapNodeDict.ContainsKey(trap))
+		{
+			TrapNodeDict[trap] = Instantiate(trapezoidNodePrefab).GetComponent<TrapezoidNode>();
+			TrapNodeDict[trap].Data = trap;
+		}
+		return TrapNodeDict[trap];
+	}
+
+	void ShowDAG()
+	{
+		// Do topological ordering
+		TopologicalOrder.Clear();
+		foreach (GameObject line in GameObject.FindGameObjectsWithTag("NodeLine"))
+		{
+			Destroy(line);
+		}
+		HashSet<Node> currSet = new HashSet<Node>();
+		Dictionary<Node, int> degree = new Dictionary<Node, int>();
+		Queue<Node> queue = new Queue<Node>();
+		degree[Root] = 0;
+
+		queue.Enqueue(Root);
+		while (queue.Count > 0)
+		{
+			Node curr = queue.Dequeue();
+			if (currSet.Contains(curr))
+			{
+				continue;
+			}
+			currSet.Add(curr);
+			if (curr.LeftChild)
+			{
+				queue.Enqueue(curr.LeftChild);
+				if (!degree.ContainsKey(curr.LeftChild))
+				{
+					degree[curr.LeftChild] = 0;
+				}
+				degree[curr.LeftChild]++;
+			}
+			if (curr.RightChild)
+			{
+				queue.Enqueue(curr.RightChild);
+				if (!degree.ContainsKey(curr.RightChild))
+				{
+					degree[curr.RightChild] = 0;
+				}
+				degree[curr.RightChild]++;
+			}
+		}
+
+		currSet.Clear();
+		currSet.Add(Root);
+		while (currSet.Count > 0)
+		{
+			TopologicalOrder.Add(currSet);
+			HashSet<Node> nextSet = new HashSet<Node>();
+			foreach (Node n in currSet)
+			{
+				if (n.LeftChild)
+				{
+					degree[n.LeftChild]--;
+					if (degree[n.LeftChild] == 0)
+					{
+						nextSet.Add(n.LeftChild);
+					}
+				}
+				if (n.RightChild)
+				{
+					degree[n.RightChild]--;
+					if (degree[n.RightChild] == 0)
+					{
+						nextSet.Add(n.RightChild);
+					}
+				}
+			}
+			currSet = nextSet;
+		}
+		// foreach (HashSet<Node> set in TopologicalOrder)
+		// {
+		// 	StringBuilder sb = new StringBuilder();
+		// 	foreach (Node node in set)
+		// 	{
+		// 		sb.Append(node.ToString()).Append("    ");
+		// 	}
+		// 	Debug.Log(sb.ToString());
+		// }
+		// Debug.Log($"Topological Depth: {TopologicalOrder.Count}");
+
+		// float range = Mathf.Pow(2, TopologicalOrder.Count-1) * spacing;
+		// PlaceNode(Root, -range, range, 0);
+		// DrawLines(Root, 0);
+
+		Dictionary<Node, int> heights = new Dictionary<Node, int>();
+		CalculateMaxHeight(Root, heights, 0);
+		PlaceNode2(Root, heights, 0, 0);
+		DrawLines(Root, 0);
+	}
+
+	int CalculateMaxHeight(Node currNode, Dictionary<Node, int> heights, int depth)
+	{
+		if (currNode == null || !TopologicalOrder[depth].Contains(currNode))
+		{
+			return -1;
+		}
+		int left = CalculateMaxHeight(currNode.LeftChild, heights, depth+1);
+		int right = CalculateMaxHeight(currNode.RightChild, heights, depth+1);
+		heights[currNode] = Mathf.Max(left, right) + 1;
+		return heights[currNode];
+	}
+
+	void PlaceNode2(Node currNode, Dictionary<Node, int> heights, float offset, int depth)
+	{
+		if (TopologicalOrder[depth].Contains(currNode))
+		{
+			Vector3 pos = new Vector3(offset + 1000, -depth*1.2f, 0);
+			currNode.transform.position = pos;
+			if (currNode.LeftChild != null && currNode.RightChild != null)
+			{
+				// float spread = Mathf.Pow(2, (heights[currNode.LeftChild] + heights[currNode.RightChild])/2) * spacing;
+				float spread = Mathf.Pow((heights[currNode.LeftChild] + heights[currNode.RightChild])/2+1, 1) * spacing;
+				// float rightSpread = Mathf.Pow(2, heights[currNode.RightChild]) * spacing;
+				PlaceNode2(currNode.LeftChild, heights, offset - spread, depth+1);
+				PlaceNode2(currNode.RightChild, heights, offset + spread, depth+1);
+			}
+		}
+	}
+
+	void PlaceNode(Node currNode, float left, float right, int depth)
+	{
+		if (currNode && TopologicalOrder[depth].Contains(currNode))
+		{
+			float mid = (right + left) / 2;
+			Vector3 pos = new Vector3(mid + 1000, -depth*1.2f, 0);
+			// Debug.Log(pos);
+			currNode.transform.position = pos;
+
+			PlaceNode(currNode.LeftChild, left, mid, depth+1);
+			PlaceNode(currNode.RightChild, mid, right, depth+1);
+		}
+	}
+
+	void DrawLines(Node currNode, int depth)
+	{
+		if (currNode && TopologicalOrder[depth].Contains(currNode))
+		{
+			foreach (Node parent in currNode.Parents)
+			{
+				LineRenderer line = Instantiate(nodeLinePrefab).GetComponent<LineRenderer>();
+				if (TopologicalOrder[depth-1].Contains(parent))
+				{
+					line.SetPosition(0, parent.transform.position);
+					line.SetPosition(1, currNode.transform.position);
+				}
+				else
+				{
+					Vector3 lowerPos;
+					if (parent.LeftChild == currNode)
+					{
+						lowerPos = parent.transform.position + new Vector3(-spacing, -1.2f, 0);
+					}
+					else
+					{
+						lowerPos = parent.transform.position + new Vector3(spacing, -1.2f, 0);
+					}
+					LineRenderer line2 = Instantiate(nodeLinePrefab).GetComponent<LineRenderer>();
+					line.SetPosition(0, parent.transform.position);
+					line.SetPosition(1, lowerPos);
+					line2.SetPosition(0, lowerPos);
+					line2.SetPosition(1, currNode.transform.position);
+				}
+			}
+
+			DrawLines(currNode.LeftChild, depth+1);
+			DrawLines(currNode.RightChild, depth+1);
+		}
+	}
+
 	public Trapezoid LocatePoint(Vertex point)
 	{
 		return LocatePointNode(point).Data;
@@ -452,19 +648,14 @@ public class TrapezoidalMap : MonoBehaviour
 		return curr as TrapezoidNode;
 	}
 
-	void InOrderTraverse(StringBuilder sb, Node currNode)
+	void InOrderTraverse(Node currNode, System.Action<Node> action)
 	{
 		if (currNode == null)
 		{
 			return;
 		}
-		InOrderTraverse(sb, currNode.LeftChild);
-		if (currNode is TrapezoidNode)
-		{
-			Trapezoid trap = (currNode as TrapezoidNode).Data;
-
-			sb.Append(trap.id).Append(" ");
-		}
-		InOrderTraverse(sb, currNode.RightChild);
+		InOrderTraverse(currNode.LeftChild, action);
+		action(currNode);
+		InOrderTraverse(currNode.RightChild, action);
 	}
 }

@@ -11,11 +11,14 @@ public class TrapezoidNode : Node
 		get { return data; }
 		set
 		{
-			if (value)
+			if (data != value)
 			{
-				value.Node = this;
+				data = value;
+				if (value)
+				{
+					value.Node = this;
+				}
 			}
-			data = value;
 		}
 	}
 
@@ -33,25 +36,10 @@ public class TrapezoidNode : Node
 
 	public override void Clear()
 	{
-		if (Data.gameObject != null)
+		if (Data != null)
 		{
 			Destroy(Data.gameObject);
 		}
 		base.Clear();
-	}
-
-	public override bool Equals(object obj)
-	{
-		if (obj is TrapezoidNode)
-		{
-			TrapezoidNode other = obj as TrapezoidNode;
-			return Data.Equals(other.Data);
-		}
-		return false;
-	}
-
-	public override int GetHashCode()
-	{
-		return Data.GetHashCode();
 	}
 }
