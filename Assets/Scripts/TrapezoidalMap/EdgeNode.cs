@@ -11,16 +11,4 @@ public class EdgeNode : Node
 		get { return data; }
 		set { data = value; }
 	}
-
-	// Use this for initialization
-	void Start()
-	{
-
-	}
-
-	// Update is called once per frame
-	void Update()
-	{
-
-	}
 }

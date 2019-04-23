@@ -88,8 +88,8 @@ public class TrapezoidalMap : MonoBehaviour
 			Vertex rightVertex = currEdge.RightVertex;
 
 			// Get left and right endpoint trapezoids
-			TrapezoidNode leftNode = LocatePointNode(leftVertex);
-			TrapezoidNode rightNode = LocatePointNode(rightVertex);
+			TrapezoidNode leftNode = LocatePointNode(leftVertex.transform.position);
+			TrapezoidNode rightNode = LocatePointNode(rightVertex.transform.position);
 			Trapezoid leftTrap = leftNode.Data;
 			Trapezoid rightTrap = rightNode.Data;
 
@@ -610,20 +610,28 @@ public class TrapezoidalMap : MonoBehaviour
 		}
 	}
 
-	public Trapezoid LocatePoint(Vertex point)
+	public Trapezoid LocatePoint(Vector3 point)
 	{
+		if (Root == null)
+		{
+			return null;
+		}
 		return LocatePointNode(point).Data;
 	}
 
-	TrapezoidNode LocatePointNode(Vertex point)
+	TrapezoidNode LocatePointNode(Vector3 point)
 	{
+		if (Root == null)
+		{
+			return null;
+		}
 		Node curr = Root;
 		while (!(curr is TrapezoidNode))
 		{
 			if (curr is VertexNode)
 			{
 				Vertex other = (curr as VertexNode).Data;
-				if (point.transform.position.x < other.transform.position.x)
+				if (point.x < other.transform.position.x)
 				{
 					curr = curr.LeftChild;
 				}
@@ -635,7 +643,7 @@ public class TrapezoidalMap : MonoBehaviour
 			else
 			{
 				Edge other = (curr as EdgeNode).Data;
-				if (point.transform.position.y > other.CalculateYCoord(point.transform.position.x))
+				if (point.y > other.CalculateYCoord(point.x))
 				{
 					curr = curr.LeftChild;
 				}
@@ -646,6 +654,44 @@ public class TrapezoidalMap : MonoBehaviour
 			}
 		}
 		return curr as TrapezoidNode;
+	}
+
+	public void HighlightPath(Vector3 point, bool highlight)
+	{
+		if (Root == null)
+		{
+			return;
+		}
+		Node curr = Root;
+		while (!(curr is TrapezoidNode))
+		{
+			curr.isHighlighted = highlight;
+			if (curr is VertexNode)
+			{
+				Vertex other = (curr as VertexNode).Data;
+				if (point.x < other.transform.position.x)
+				{
+					curr = curr.LeftChild;
+				}
+				else
+				{
+					curr = curr.RightChild;
+				}
+			}
+			else
+			{
+				Edge other = (curr as EdgeNode).Data;
+				if (point.y > other.CalculateYCoord(point.x))
+				{
+					curr = curr.LeftChild;
+				}
+				else
+				{
+					curr = curr.RightChild;
+				}
+			}
+		}
+		curr.isHighlighted = highlight;
 	}
 
 	void InOrderTraverse(Node currNode, System.Action<Node> action)

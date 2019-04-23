@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Node : MonoBehaviour
 {
+	public Material defaultMaterial;
+	public Material highlightMaterial;
+	public bool isHighlighted;
+
 	[SerializeField]
 	Node leftChild;
 	public Node LeftChild
@@ -44,6 +48,8 @@ public class Node : MonoBehaviour
 
 	public HashSet<Node> Parents { get; set; }
 
+	new Renderer renderer;
+
 	static int nodeCount = 0;
 	public int id;
 
@@ -55,15 +61,22 @@ public class Node : MonoBehaviour
 	}
 
 	// Use this for initialization
-	void Start()
+	protected void Start()
 	{
-
+		renderer = GetComponent<MeshRenderer>();
 	}
 
 	// Update is called once per frame
-	void Update()
+	protected void Update()
 	{
-
+		if (isHighlighted)
+		{
+			renderer.material = highlightMaterial;
+		}
+		else
+		{
+			renderer.material = defaultMaterial;
+		}
 	}
 
 	public void ReplaceNode(Node other)

@@ -110,6 +110,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7bee623ab31434cc5a0492c6538fb632, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultMaterial: {fileID: 2100000, guid: 5d7d837ecb7404d70b47a19d735f7c59, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: 6851635ce030644f897ea8133972c7fb, type: 2}
+  isHighlighted: 0
   leftChild: {fileID: 0}
   rightChild: {fileID: 0}
+  id: 0
   data: {fileID: 0}
