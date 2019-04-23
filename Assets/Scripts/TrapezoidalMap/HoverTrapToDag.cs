@@ -27,7 +27,11 @@ public class HoverTrapToDag : MonoBehaviour
 			return;
 		}
 
-		trapezoidalMap.HighlightPath(lastPos, false);
+		if (lastTrap)
+		{
+			trapezoidalMap.HighlightPath(lastPos, false);
+			lastTrap = null;
+		}
 
 		Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 		Vector3 viewPoint = Camera.main.WorldToViewportPoint(mouseRay.origin);
@@ -38,7 +42,7 @@ public class HoverTrapToDag : MonoBehaviour
 		Vector3 worldPos = new Vector3(mouseRay.origin.x, mouseRay.origin.y, 0);
 
 		Trapezoid newTrap = trapezoidalMap.LocatePoint(worldPos);
-		
+
 		trapezoidalMap.HighlightPath(worldPos, true);
 
 		lastPos = worldPos;
