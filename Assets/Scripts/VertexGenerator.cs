@@ -55,4 +55,13 @@ public class VertexGenerator : MonoBehaviour
 			}
 		}
 	}
+
+	public void Clear()
+	{
+		foreach (Vertex v in Vertices)
+		{
+			Destroy(v.gameObject);
+		}
+		Vertices.Clear();
+	}
 }

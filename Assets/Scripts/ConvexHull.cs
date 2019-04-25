@@ -7,6 +7,8 @@ public class ConvexHull : MonoBehaviour {
     public float speed = 0.5f;
     public GameObject edgePrefab;
 
+    public bool IsGenerating { get; private set; }
+
     private List<Vertex> lower;
     private List<Vertex> upper;
     private List<Vertex> hull;
@@ -23,29 +25,59 @@ public class ConvexHull : MonoBehaviour {
     }
 
     private void Start() {
-        pointCloud = GetComponent<PointCloud>();
-        StartCoroutine("GrahamScan");
+        pointCloud = GameObject.Find("PointCloud").GetComponent<PointCloud>();
     }
 
     private void Update() {
 
-        ConstructHull();
-        for (int i = 1; i < hull.Count; i++) {
-            if (i >= edges.Count) {
-                Edge edge = Instantiate(edgePrefab).GetComponent<Edge>();
-                edges.Add(edge);
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            foreach (Edge e in edges)
+            {
+                Destroy(e.gameObject);
             }
-            edges[i - 1].Point1 = hull[i - 1];
-            edges[i - 1].Point2 = hull[i];
-            edges[i - 1].transform.SetParent(transform);
-            edges[i - 1].gameObject.SetActive(true);
-
-            edges[i - 1].isHighlighted = i >= hull.Count - 1 && edges[0].Point1 != edges[i - 1].Point2;
+            VertexGenerator generator = GameObject.Find("VertexGenerator").GetComponent<VertexGenerator>();
+            generator.Clear();
         }
 
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            pointCloud.GenerateCloud();
+        }
 
-        for (int i = hull.Count; i < edges.Count; i++) {
-            edges[i].gameObject.SetActive(false);
+        if (Input.GetKeyDown(KeyCode.G) && !IsGenerating)
+        {
+            Debug.Log("Generating convex hull with Graham Scan");
+            VertexGenerator generator = GameObject.Find("VertexGenerator").GetComponent<VertexGenerator>();
+            foreach (Edge e in edges)
+            {
+                Destroy(e.gameObject);
+            }
+
+            StartCoroutine(GrahamScan(new List<Vertex>(generator.Vertices).ToArray()));
+        }
+
+        if (IsGenerating)
+        {
+            ConstructHull();
+            for (int i = 1; i < hull.Count; i++) {
+                if (i >= edges.Count) {
+                    Edge edge = Instantiate(edgePrefab).GetComponent<Edge>();
+                    edges.Add(edge);
+                }
+                edges[i - 1].Point1 = hull[i - 1];
+                edges[i - 1].Point2 = hull[i];
+                edges[i - 1].SetPosition(hull[i - 1].transform.position, hull[i].transform.position);
+                edges[i - 1].transform.SetParent(transform);
+                edges[i - 1].gameObject.SetActive(true);
+
+                edges[i - 1].isHighlighted = i >= hull.Count - 1 && edges[0].Point1 != edges[i - 1].Point2;
+            }
+
+
+            for (int i = hull.Count; i < edges.Count; i++) {
+                edges[i].gameObject.SetActive(false);
+            }
         }
     }
 
@@ -63,8 +95,9 @@ public class ConvexHull : MonoBehaviour {
         }
     }
 
-    private IEnumerator GrahamScan() {
-        Vertex[] points = pointCloud.Points.ToArray();
+    private IEnumerator GrahamScan(Vertex[] points) {
+        IsGenerating = true;
+
         Array.Sort(points, delegate (Vertex v1, Vertex v2) {
             return v1.transform.position.x.CompareTo(v2.transform.position.x);
         });
@@ -89,6 +122,7 @@ public class ConvexHull : MonoBehaviour {
             yield return new WaitForSecondsRealtime(speed);
         }
 
+        IsGenerating = false;
         yield return null;
     }
 }

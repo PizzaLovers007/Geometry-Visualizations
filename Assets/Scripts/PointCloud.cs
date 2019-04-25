@@ -7,25 +7,21 @@ public class PointCloud : MonoBehaviour {
 
     public GameObject vertexPrefab;
 
-    public List<Vertex> Points { get; private set; }
-    
-    private void Awake() {
-        Points = new List<Vertex>();
-    }
-
     private void Start() {
-        GenerateCloud();
+
     }
 
     private void Update() {
         
     }
 
-    private void GenerateCloud() {
-        Random.InitState(10);
+    public void GenerateCloud() {
+        // Random.InitState(10);
         float radius = 5f;
 
         float[] densityZones = new float[] { 1f };
+
+        VertexGenerator generator = GameObject.Find("VertexGenerator").GetComponent<VertexGenerator>();
 
         for (int i = 0; i < Size; i++) {
             int zone = 0;
@@ -50,8 +46,7 @@ public class PointCloud : MonoBehaviour {
             Vector2 position = direction * Random.Range(range[0], range[1]);
 
             Vertex vert = Instantiate(vertexPrefab, position, Quaternion.identity).GetComponent<Vertex>();
-            vert.transform.SetParent(transform);
-            Points.Add(vert);
+            generator.Vertices.Add(vert);
         }
     }
 }

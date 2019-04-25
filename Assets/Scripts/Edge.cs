@@ -85,15 +85,14 @@ public class Edge : MonoBehaviour
 	{
 		id = edgeCount;
 		edgeCount++;
+		lineRenderer = GetComponent<LineRenderer>();
+		lineRenderer.positionCount = 2;
+		boxCollider = GetComponent<BoxCollider>();
 	}
 
 	// Use this for initialization
 	void Start()
 	{
-		lineRenderer = GetComponent<LineRenderer>();
-		boxCollider = GetComponent<BoxCollider>();
-
-		lineRenderer.positionCount = 2;
 	}
 
 	// Update is called once per frame
