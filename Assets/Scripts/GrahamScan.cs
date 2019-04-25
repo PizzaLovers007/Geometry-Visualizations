@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ConvexHull : MonoBehaviour {
+public class GrahamScan : MonoBehaviour {
     public float speed = 0.5f;
     public GameObject edgePrefab;
 
@@ -30,17 +30,22 @@ public class ConvexHull : MonoBehaviour {
 
     private void Update() {
 
-        if (Input.GetKeyDown(KeyCode.D))
+        if (Input.GetKeyDown(KeyCode.D) && !IsGenerating)
         {
             foreach (Edge e in edges)
             {
+                e.gameObject.SetActive(true);
                 Destroy(e.gameObject);
             }
+            edges.Clear();
             VertexGenerator generator = GameObject.Find("VertexGenerator").GetComponent<VertexGenerator>();
             generator.Clear();
+            upper.Clear();
+            lower.Clear();
+            hull.Clear();
         }
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && !IsGenerating)
         {
             pointCloud.GenerateCloud();
         }
@@ -48,13 +53,18 @@ public class ConvexHull : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.G) && !IsGenerating)
         {
             Debug.Log("Generating convex hull with Graham Scan");
-            VertexGenerator generator = GameObject.Find("VertexGenerator").GetComponent<VertexGenerator>();
             foreach (Edge e in edges)
             {
+                e.gameObject.SetActive(true);
                 Destroy(e.gameObject);
             }
+            edges.Clear();
+            upper.Clear();
+            lower.Clear();
+            hull.Clear();
 
-            StartCoroutine(GrahamScan(new List<Vertex>(generator.Vertices).ToArray()));
+            VertexGenerator generator = GameObject.Find("VertexGenerator").GetComponent<VertexGenerator>();
+            StartCoroutine(DoGrahamScan(new List<Vertex>(generator.Vertices).ToArray()));
         }
 
         if (IsGenerating)
@@ -95,7 +105,7 @@ public class ConvexHull : MonoBehaviour {
         }
     }
 
-    private IEnumerator GrahamScan(Vertex[] points) {
+    private IEnumerator DoGrahamScan(Vertex[] points) {
         IsGenerating = true;
 
         Array.Sort(points, delegate (Vertex v1, Vertex v2) {

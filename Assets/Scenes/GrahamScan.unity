@@ -123,7 +123,7 @@ GameObject:
   - component: {fileID: 135002811}
   - component: {fileID: 135002813}
   m_Layer: 0
-  m_Name: ConvexHull
+  m_Name: GrahamScan
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
