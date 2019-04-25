@@ -773,11 +773,13 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Left click adds line segments
+  m_Text: 'Left click to add line segment
 
-    Right click delete line segments
+    Right click to delete line segment
 
-    ''g'' to generate trapezoid map'
+    ''g'' to generate trapezoid map
+
+    ''d'' to delete all segments'
 --- !u!222 &2111335377
 CanvasRenderer:
   m_ObjectHideFlags: 0

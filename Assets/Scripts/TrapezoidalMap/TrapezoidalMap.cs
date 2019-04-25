@@ -21,17 +21,20 @@ public class TrapezoidalMap : MonoBehaviour
 	Node Root { get; set; }
 	List<HashSet<Node>> TopologicalOrder { get; set; }
 	Dictionary<Trapezoid, TrapezoidNode> TrapNodeDict { get; set; } 
+	List<GameObject> NodeLines { get; set; }
 
 	// Use this for initialization
 	void Start()
 	{
 		TopologicalOrder = new List<HashSet<Node>>();
 		TrapNodeDict = new Dictionary<Trapezoid, TrapezoidNode>();
+		NodeLines = new List<GameObject>();
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
+		EdgeGenerator generator = GameObject.Find("EdgeGenerator").GetComponent<EdgeGenerator>();
 		if (Input.GetKeyDown(KeyCode.G) && !IsGenerating)
 		{
 			Debug.Log("Generating map");
@@ -39,8 +42,26 @@ public class TrapezoidalMap : MonoBehaviour
 			{
 				Root.Clear();
 			}
-			EdgeGenerator generator = GameObject.Find("EdgeGenerator").GetComponent<EdgeGenerator>();
 			StartCoroutine(AssembleMap(new List<Edge>(generator.Edges)));
+		}
+		if (Input.GetKeyDown(KeyCode.D) && !IsGenerating)
+		{
+			Reset();
+			generator.Clear();
+		}
+	}
+
+	public void Reset()
+	{
+		if (Root)
+		{
+			Root.Clear();
+			TrapNodeDict.Clear();
+			foreach (GameObject line in NodeLines)
+			{
+				Destroy(line);
+			}
+			NodeLines.Clear();
 		}
 	}
 
@@ -581,6 +602,7 @@ public class TrapezoidalMap : MonoBehaviour
 			foreach (Node parent in currNode.Parents)
 			{
 				LineRenderer line = Instantiate(nodeLinePrefab).GetComponent<LineRenderer>();
+				NodeLines.Add(line.gameObject);
 				if (TopologicalOrder[depth-1].Contains(parent))
 				{
 					line.SetPosition(0, parent.transform.position);
@@ -598,6 +620,7 @@ public class TrapezoidalMap : MonoBehaviour
 						lowerPos = parent.transform.position + new Vector3(spacing, -1.2f, 0);
 					}
 					LineRenderer line2 = Instantiate(nodeLinePrefab).GetComponent<LineRenderer>();
+					NodeLines.Add(line2.gameObject);
 					line.SetPosition(0, parent.transform.position);
 					line.SetPosition(1, lowerPos);
 					line2.SetPosition(0, lowerPos);
@@ -616,7 +639,7 @@ public class TrapezoidalMap : MonoBehaviour
 		{
 			return null;
 		}
-		return LocatePointNode(point).Data;
+		return LocatePointNode(point)?.Data;
 	}
 
 	TrapezoidNode LocatePointNode(Vector3 point)
@@ -628,6 +651,10 @@ public class TrapezoidalMap : MonoBehaviour
 		Node curr = Root;
 		while (!(curr is TrapezoidNode))
 		{
+			if (curr == null)
+			{
+				return null;
+			}
 			if (curr is VertexNode)
 			{
 				Vertex other = (curr as VertexNode).Data;
@@ -665,6 +692,10 @@ public class TrapezoidalMap : MonoBehaviour
 		Node curr = Root;
 		while (!(curr is TrapezoidNode))
 		{
+			if (curr == null)
+			{
+				return;
+			}
 			curr.isHighlighted = highlight;
 			if (curr is VertexNode)
 			{

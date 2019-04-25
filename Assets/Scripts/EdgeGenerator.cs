@@ -102,6 +102,8 @@ public class EdgeGenerator : MonoBehaviour
 
 				if (vert)
 				{
+					trapezoidalMap.Reset();
+
 					// Find connected edges
 					HashSet<Edge> toRemove = new HashSet<Edge>();
 					foreach (Edge e in Edges)
@@ -138,6 +140,8 @@ public class EdgeGenerator : MonoBehaviour
 				}
 				else if (edge)
 				{
+					trapezoidalMap.Reset();
+					
 					// Delete connected vertices if this is the only edge
 					edge.Point1.Degree--;
 					edge.Point2.Degree--;
@@ -191,5 +195,19 @@ public class EdgeGenerator : MonoBehaviour
 				}
 			}
 		}
+	}
+
+	public void Clear()
+	{
+		foreach (Edge e in Edges)
+		{
+			Destroy(e.gameObject);
+		}
+		foreach (Vertex v in Vertices)
+		{
+			Destroy(v.gameObject);
+		}
+		Edges.Clear();
+		Vertices.Clear();
 	}
 }
