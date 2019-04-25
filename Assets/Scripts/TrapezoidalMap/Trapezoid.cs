@@ -99,7 +99,7 @@ public class Trapezoid : MonoBehaviour
 	// Use this for initialization
 	void Start()
 	{
-		Mesh mesh = GetComponent<MeshFilter>().mesh;
+		Mesh mesh = new Mesh();
 
 		float xLeft = LeftVertex.transform.position.x;
 		float xRight = RightVertex.transform.position.x;
@@ -134,6 +134,9 @@ public class Trapezoid : MonoBehaviour
 
 		// Assign collider
 		GetComponent<MeshCollider>().sharedMesh = mesh;
+
+		// Assign mesh
+		GetComponent<MeshFilter>().mesh = mesh;
 
 		// Create material
 		GetComponent<MeshRenderer>().material = new Material(Shader.Find("Unlit/Transparent"));

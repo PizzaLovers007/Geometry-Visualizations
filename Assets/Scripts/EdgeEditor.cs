@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(Edge))]
 public class EdgeEditor : Editor
 {
@@ -36,3 +37,4 @@ public class EdgeEditor : Editor
 		edge.isFaded = EditorGUILayout.Toggle("Is Faded", edge.isFaded);
 	}
 }
+#endif
