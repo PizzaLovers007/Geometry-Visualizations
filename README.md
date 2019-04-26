@@ -5,7 +5,7 @@ Visualizations of several computational geometry algorithms, written in Unity.
 ## Algorithms
 
 * [x] Graham Scan/Monotone Chain
-* [ ] Jarvis March/Gift Wrapping
+* [x] Jarvis March/Gift Wrapping
 * [ ] Fortune's Algorithm
 * [ ] Delaunay Triangulation (Randomized Incremental Construction)
 * [x] Trapezoidal Map (Randomized Incremental Construction)
