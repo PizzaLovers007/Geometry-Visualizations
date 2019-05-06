@@ -7,11 +7,13 @@ public class VertexGenerator : MonoBehaviour
 	public GameObject vertexPrefab;
 
 	public HashSet<Vertex> Vertices { get; private set; }
+    public List<Vertex> IterableVertices { get; private set; }
 
 	// Use this for initialization
 	void Start()
 	{
 		Vertices = new HashSet<Vertex>();
+        IterableVertices = new List<Vertex>();
 	}
 
 	// Update is called once per frame
@@ -36,7 +38,9 @@ public class VertexGenerator : MonoBehaviour
 			if (doAdd)
 			{
 				Vertex vert = Instantiate(vertexPrefab, worldPos, Quaternion.identity).GetComponent<Vertex>();
-				Vertices.Add(vert);
+				if(Vertices.Add(vert)) {
+                    IterableVertices.Add(vert);
+                }
 			}
 		}
 		// Right click removes point
@@ -48,7 +52,9 @@ public class VertexGenerator : MonoBehaviour
 				if (hit.transform.GetComponent<Vertex>() != null)
 				{
 					Vertex vert = hit.transform.GetComponent<Vertex>();
-					Vertices.Remove(vert);
+                    if (Vertices.Remove(vert)) {
+                        IterableVertices.Remove(vert);
+                    }
 					Destroy(hit.transform.gameObject);
 					break;
 				}
@@ -62,6 +68,7 @@ public class VertexGenerator : MonoBehaviour
 		{
 			Destroy(v.gameObject);
 		}
-		Vertices.Clear();
+        Vertices.Clear();
+        IterableVertices.Clear();
 	}
 }

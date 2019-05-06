@@ -46,7 +46,9 @@ public class PointCloud : MonoBehaviour {
             Vector2 position = direction * Random.Range(range[0], range[1]);
 
             Vertex vert = Instantiate(vertexPrefab, position, Quaternion.identity).GetComponent<Vertex>();
-            generator.Vertices.Add(vert);
+            if (generator.Vertices.Add(vert)) {
+                generator.IterableVertices.Add(vert);
+            }
         }
     }
 }

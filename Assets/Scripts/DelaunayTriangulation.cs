@@ -167,12 +167,14 @@ namespace Delaunay {
         private TriangleContainer container;
 
         private List<Edge> edges;
+        private List<Vertex> added;
 
         private void Start() {
             pointCloud = GameObject.Find("PointCloud").GetComponent<PointCloud>();
             generator = GameObject.Find("VertexGenerator").GetComponent<VertexGenerator>();
             edges = new List<Edge>();
             container = new TriangleContainer();
+            added = new List<Vertex>();
         }
 
         private void Update() {
@@ -184,19 +186,31 @@ namespace Delaunay {
                 edges.Clear();
                 generator.Clear();
                 container.Clear();
+                added.Clear();
             }
             if (Input.GetKeyDown(KeyCode.R) && !IsGenerating) {
                 pointCloud.GenerateCloud();
             }
 
             if (Input.GetKeyDown(KeyCode.G) && !IsGenerating) {
-                StartCoroutine(Triangulate(new List<Vertex>(generator.Vertices)));
+                edges.Clear();
+                container.Clear();
+                added.Clear();
+                StartCoroutine(Triangulate());
             }
 
             Render();
         }
 
         private void Render() {
+            for (int p = 0; p < generator.IterableVertices.Count; p++) {
+                generator.IterableVertices[p].isFaded = true;
+            }
+
+            for (int p = 0; p < added.Count; p++) {
+                added[p].isFaded = false;
+            }
+
             List<VertexPair> vertexPairs = new List<VertexPair>();
             for (int t = 0; t < container.Count; t++) {
                 Triangle tri = container[t];
@@ -212,8 +226,6 @@ namespace Delaunay {
                 vertexPairs.Add(e1);
                 vertexPairs.Add(e2);
                 vertexPairs.Add(e3);
-
-
             }
 
             for (int i = 0; i < vertexPairs.Count; i++) {
@@ -235,7 +247,7 @@ namespace Delaunay {
             }
         }
 
-        private IEnumerator Triangulate(List<Vertex> points) {
+        private IEnumerator Triangulate() {
             IsGenerating = true;
 
             // create super triangle
@@ -244,19 +256,15 @@ namespace Delaunay {
             // add triangle
             container.Add(super);
 
-
-            for (int p = 0; p < points.Count; p++) {
-                points[p].isFaded = true;
-            }
-
-            for (int p = 0; p < points.Count; p++) {
-                points[p].isFaded = false;
-                points[p].isHighlighted = true;
+            for (int p = 0; p < generator.IterableVertices.Count; p++) {
+                Vertex point = generator.IterableVertices[p];
+                point.isHighlighted = true;
+                added.Add(point);
 
                 yield return new WaitForSecondsRealtime(speed);
 
                 // get containing triangle
-                Triangle t = container.ContainingTriangle(points[p]);
+                Triangle t = container.ContainingTriangle(point);
 
                 t.isHighlighted = true;
 
@@ -274,9 +282,9 @@ namespace Delaunay {
                     container.Remove(t);
 
                     // create new triangles
-                    Triangle t1 = new Triangle(a, b, points[p]);
-                    Triangle t2 = new Triangle(b, c, points[p]);
-                    Triangle t3 = new Triangle(c, a, points[p]);
+                    Triangle t1 = new Triangle(a, b, point);
+                    Triangle t2 = new Triangle(b, c, point);
+                    Triangle t3 = new Triangle(c, a, point);
 
                     // add triangles
                     container.Add(t1);
@@ -286,16 +294,16 @@ namespace Delaunay {
                     yield return new WaitForSecondsRealtime(speed);
 
                     // make legal
-                    yield return MakeDelaunay(t1, new VertexPair(a, b), points[p]);
-                    yield return MakeDelaunay(t2, new VertexPair(b, c), points[p]);
-                    yield return MakeDelaunay(t3, new VertexPair(c, a), points[p]);
+                    yield return MakeDelaunay(t1, new VertexPair(a, b), point);
+                    yield return MakeDelaunay(t2, new VertexPair(b, c), point);
+                    yield return MakeDelaunay(t3, new VertexPair(c, a), point);
 
                     yield return new WaitForSecondsRealtime(speed);
                 } else {
                     Debug.Log("Not contained!");
                 }
 
-                points[p].isHighlighted = false;
+                point.isHighlighted = false;
             }
 
             // remove edges for super triangle
