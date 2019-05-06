@@ -16,7 +16,7 @@ public class PointCloud : MonoBehaviour {
     }
 
     public void GenerateCloud() {
-        // Random.InitState(10);
+        //Random.InitState(10);
         float radius = 5f;
 
         float[] densityZones = new float[] { 1f };

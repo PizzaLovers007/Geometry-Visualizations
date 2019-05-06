@@ -60,4 +60,9 @@ public class Vertex : MonoBehaviour
 		}
 		return false;
 	}
+
+    public override string ToString() {
+        Vector2 p = transform.position;
+        return string.Format("({0}, {1})", p.x, p.y);
+    }
 }
