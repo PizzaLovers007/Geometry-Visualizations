@@ -23,18 +23,20 @@ public class TrapezoidalMap : MonoBehaviour
 	Dictionary<Trapezoid, TrapezoidNode> TrapNodeDict { get; set; } 
 	List<GameObject> NodeLines { get; set; }
 
+	EdgeGenerator generator;
+
 	// Use this for initialization
 	void Start()
 	{
 		TopologicalOrder = new List<HashSet<Node>>();
 		TrapNodeDict = new Dictionary<Trapezoid, TrapezoidNode>();
 		NodeLines = new List<GameObject>();
+		generator = GameObject.Find("EdgeGenerator").GetComponent<EdgeGenerator>();
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
-		EdgeGenerator generator = GameObject.Find("EdgeGenerator").GetComponent<EdgeGenerator>();
 		if (Input.GetKeyDown(KeyCode.G) && !IsGenerating)
 		{
 			Debug.Log("Generating map");
